@@ -1,5 +1,5 @@
 # decay-of-SARS-CoV-2-by-US-city
-Significance: Make it easier for public health practioners or members of public to easily get current location-specific airborne or surface decay (50%, 90%, or 99%) time estimates for COVID-19 based on current weather forecasts
+Significance: Make it easier for public health practioners or members of public to get current location-specific airborne or surface decay (50%, 90%, or 99%) time estimates for COVID-19 based on current weather forecasts
 
 Purpose: Develop R shiny app to provide airborne and surface decay estimates for specific US cities based on latest weather forecasts
 
