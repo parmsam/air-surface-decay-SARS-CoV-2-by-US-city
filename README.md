@@ -1,5 +1,5 @@
 # decay-of-SARS-CoV-2-by-US-city
-airborne and surface decay estimates specific to major US cities latest weather forecast
+Purpose: Develop R shiny app to provide airborne and surface decay estimates for specific US cities based on latest weather forecasts
 ## Data Sources:
 ### Estimated SARS-CoV-2 (COVID-19) Airborne Decay
 https://www.dhs.gov/science-and-technology/sars-airborne-calculator
