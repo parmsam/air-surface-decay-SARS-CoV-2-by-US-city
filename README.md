@@ -9,3 +9,4 @@ https://www.dhs.gov/science-and-technology/sars-calculator
 https://www.weather.gov/documentation/services-web-api
 ### National Weather Service Ultraviolet (UV) Index 
 https://www.weather.gov/rah/uv
+https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt
