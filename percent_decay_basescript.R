@@ -1,4 +1,4 @@
-library(shiny)
+tlibrary(shiny)
 library(tidyverse)
 library(rio)
 library(jsonlite)
@@ -179,7 +179,7 @@ weather_dat <- fromJSON(json)
 
 #pull tonight/tmrw/rest week weather data from rest data
 temperature <- weather_dat$properties$temperature$values
-temperature_unit <- weather_dat$properties$temperature$uom %>% str_extract()
+temperature_unit <- weather_dat$properties$temperature$uom
 relativeHumidity <- weather_dat$properties$relativeHumidity$values
 relativeHumidity_unit <- weather_dat$properties$relativeHumidity$sourceUnit
 
