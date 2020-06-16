@@ -161,20 +161,23 @@ df2_UVI <- rbind(df1_UVI[,1:3], df1_UVI[,4:6]) %>% data.frame() %>%
 
 
 # Define UI for application that ouptuts table of weather forecast
+
 ui <- fluidPage(
   
   # Application title
-  titlePanel("National Weather Service Forecast Data for Major Cities"),
-  
+  titlePanel("Surface and Air Decay Estimates for SARS-CoV-2 in Major Cities based on Current Weather"),
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-      selectInput("variable_1", "Pick or type the major city  you want weatherforecast info on",
+      selectInput("variable_1", "Select city of interest:",
                   #choices=list("",name = c("Cho"="",unique(Dat$Resource_name))),
                   choices=c("Choose one"="",sort(unique(city_select_list$city_state))),
                   #options = list(placeholder = 'Please select an option below'),
                   selected = "Indianapolis, Indiana"
                   #verbatimTextOutput("selected")
+      ),
+      selectInput("variable_2", "Select percent virus decay:",
+                     choices=c(50,90,99,99.99,99.9999,99.999999)
       )
     ),
     
@@ -234,17 +237,18 @@ server <- function(input, output) {
       mutate(cityUVI = city_UVI) %>% 
       filter(str_detect(validTime,paste(today,yesterday,sep="|"))) %>%
       mutate(temperature_F = round(convertToCelcius(.$temperature),1)) %>%
-      mutate(`Airborne_Percent_Virus_Decay(in minutes)`= airHalfLifeCalc(.$temperature_F, 
+      mutate(`Airborne Percent Virus Decay (minutes)`= airHalfLifeCalc(.$temperature_F, 
                                                                    .$relativeHumidity, 
                                                                    .$cityUVI,
-                                                                   perc_decay = 0.50)) %>%
-      mutate(`Surface_Percent_Virus_Decay(in hours)`= sfcHalfLifeCalc(.$temperature_F, 
+                                                                   perc_decay = as.numeric(input$variable_2)/100)) %>%
+      mutate(`Surface Percent Virus Decay (hours)`= sfcHalfLifeCalc(.$temperature_F, 
                                                                   .$relativeHumidity,
-                                                                  perc_decay = 0.50))
-      
-    temp_and_humid <- temp_and_humid %>% select(Time=validTime, 
-                                                `Surface_Percent_Virus_Decay(in hours)`, 
-                                                `Airborne_Percent_Virus_Decay(in minutes)`,
+                                                                  perc_decay = as.numeric(input$variable_2)/100)) %>%
+      mutate(validTime = as.character(ymd_hms(str_remove(validTime,"/\\w*"))))
+    
+    temp_and_humid <- temp_and_humid %>% select(`Time (UTC)`=validTime, 
+                                                `Surface Percent Virus Decay (hours)`, 
+                                                `Airborne Percent Virus Decay (minutes)`,
                                                 `Temperature (Fahrenheit)`= temperature_F,
                                                 `Relative Humidity` = `relativeHumidity`,
                                                 `UV Index` = cityUVI)
