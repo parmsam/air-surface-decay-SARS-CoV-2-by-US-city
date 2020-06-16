@@ -1,10 +1,10 @@
-# air and surface decay-of-SARS-CoV-2-by-US-city
+# current air and surface decay-of-SARS-CoV-2-by-US-city
 
 ## Shiny App
 https://parmsam.shinyapps.io/Airborne_and_Surface_Decay_of_SARS_CoV-2_for_Major_Cities/
 
 ## Significance and Purpose
-Significance: Make it easier for public health practioners or members of public to get location-specific SARS-CoV-2 airborne or surface decay estimates
+Significance: Make it easier for public health practioners or members of public to get current location-specific SARS-CoV-2 airborne or surface decay estimates
 
 Purpose: Develop R shiny app to provide airborne and surface decay estimates for specific US cities based based on current weather forecasts and recent DHS models (as of June 15th, 2020)
 
