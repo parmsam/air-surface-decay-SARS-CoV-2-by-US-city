@@ -4,6 +4,7 @@ library(rio)
 library(jsonlite)
 library(httr)
 library(DT)
+library(lubridate)
 
 # Define functions ----
 #surface decay equation based on most DHS gov model available as of June 15, 2020
@@ -13,7 +14,7 @@ logWithBase <- function(x, base){
 }
 
 convertToFahr <- function(temp_c){
-  return((temp_f*9/5)+32)
+  return((temp_c*9/5)+32)
 }
 
 sfcHalfLifeCalc <- function(temp_f_value, relative_humidity, perc_decay){
@@ -148,8 +149,6 @@ city_list <-
   mutate(city_state=paste0(City,", ",State)) %>% 
   inner_join(.,state_abbrev, by=c("State"="state"))
 
-city_select_list <- city_list %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
-
 UVI_data <- read.delim("https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt", 
                        row.names=NULL)
 df_UVI <- slice(UVI_data,-(1:21))
@@ -159,6 +158,7 @@ df1_UVI <- df1_UVI[-1,]
 df2_UVI <- rbind(df1_UVI[,1:3], df1_UVI[,4:6]) %>% data.frame() %>% 
   mutate(CITY = str_to_title(CITY), UVI = as.numeric(as.character(UVI)))
 
+city_select_list <- city_list %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
 
 # Define UI for application that ouptuts table of weather forecast
 
@@ -233,10 +233,10 @@ server <- function(input, output) {
              relativeHumidity_unit = relativeHumidity_unit) %>% 
       select(-value.x,-value.y) %>% select(validTime, relativeHumidity, relativeHumidity_unit, 
                                            temperature, temperature_unit) %>% 
-      mutate(temperature_F = convertToCelcius(temperature)) %>% 
+      mutate(temperature_F = convertToFahr(temperature)) %>% 
       mutate(cityUVI = city_UVI) %>% 
       filter(str_detect(validTime,paste(today,yesterday,sep="|"))) %>%
-      mutate(temperature_F = round(convertToCelcius(.$temperature),1)) %>%
+      mutate(temperature_F = round(convertToFahr(.$temperature),1)) %>%
       mutate(`Airborne Percent Virus Decay (minutes)`= airHalfLifeCalc(.$temperature_F, 
                                                                    .$relativeHumidity, 
                                                                    .$cityUVI,
