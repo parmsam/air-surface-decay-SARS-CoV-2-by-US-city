@@ -137,7 +137,7 @@ yesterday <- as.character(Sys.Date()-1)
 
 state_abbrev <- read.csv("https://raw.githubusercontent.com/chris-taylor/USElection/master/data/state-abbreviations.csv", 
                          header=FALSE) %>%
-  mutate(state = as.character(V1), abbrev = as.character(V2)) %>% select(-V1,-V2) %>%
+  mutate(state = as.character(V1), abbrev = as.character(V2)) %>% select(-V1,-V2)
 
 city_list <- 
   import("https://raw.githubusercontent.com/parmsam/national-weather-service-forecasts/master/1000-largest-us-cities-by-population-with-geographic-coordinates.csv") %>% 
