@@ -113,8 +113,8 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
   
   
   covid_perc_decay= half_life * logWithBase((1- perc_decay), .5)
-  #covid_decay_minutes = round(covid_perc_decay,2)
-  covid_decay_hours = round(covid_perc_decay/60,2)
+  covid_decay_minutes = round(covid_perc_decay,2)
+  #covid_decay_hours = round(covid_perc_decay/60,2)
   
   # covid_90 = half_life * logWithBase((1- .90), .5)
   # covid_90_minutes = round(covid_90,2)
@@ -129,7 +129,7 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
   #     Minutes = c(covid_half_life_minutes, covid_90_minutes, covid_99_minutes),
   #     Hours = c(covid_half_life_hours, covid_90_hours, covid_99_hours))
   
-  return(covid_decay_hours)
+  return(covid_decay_minutes)
 }
 #airHalfLifeCalc(50,20,1,0.5)
 #sfcHalfLifeCalc(74,40,0.5)
@@ -178,7 +178,25 @@ ui <- fluidPage(
       ),
       selectInput("variable_2", "Select percent virus decay:",
                      choices=c(50,90,99,99.99,99.9999,99.999999)
-      )
+      ),
+      strong("Purpose:"),
+      "This app is designed to make it easier for public health practioners to get current location-specific SARS-CoV-2 airborne or surface decay estimates",
+      "It is based based on current weather forecasts and recent DHS models (as of June 15th, 2020).",
+      br(),
+      strong("Info sources:"),
+      "National Weather Service (NWS) API used to obtain current temperature and relative humidity estimates.",
+      "UV index pulled from daily NWS Text Bulletin. Note that this may result in underestimated time to breakdown (decay).",
+      "Airborne and Surface Decay based on models published by Department of Homeland Security as of June 15th, 2020.",
+      br(),
+      strong("Reference models:"),
+      "See links below for more info on DHS models (background and caveats for each model).",
+      br(),
+      tags$li(a("https://www.dhs.gov/science-and-technology/sars-airborne-calculator")),
+      tags$li(a("https://www.dhs.gov/science-and-technology/sars-calculator")),
+      br(),
+      strong("Github repo:"),
+      "See Github repo for more info and source code.",
+      tags$li(a("https://github.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city"))
     ),
     
     # Show a data table of the weather forecast prediction for weather.gov
@@ -252,6 +270,13 @@ server <- function(input, output) {
                                                 `Temperature (Fahrenheit)`= temperature_F,
                                                 `Relative Humidity` = `relativeHumidity`,
                                                 `UV Index` = cityUVI)
+    
+    newname1 = paste("Time (hours) to breakdown of",input$variable_2,"percent of virus on surfaces",sep=" ")
+    newname2 = paste("Time (minutes) to breakdown of",input$variable_2,"percent of airborne virus",sep=" ")
+    
+    temp_and_humid <- temp_and_humid %>% rename(!!newname1 := `Surface Percent Virus Decay (hours)`,
+                                                !!newname2 := `Airborne Percent Virus Decay (minutes)`
+                                                )
 })
   
   output$data <- DT::renderDataTable({ 
