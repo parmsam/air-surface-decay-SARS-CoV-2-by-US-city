@@ -18,6 +18,27 @@ convertToFahr <- function(temp_c){
 }
 
 sfcHalfLifeCalc <- function(temp_f_value, relative_humidity, perc_decay){
+  #model constraints
+  temp_f_value_orig = temp_f_value
+  relative_humidity_orig = relative_humidity
+  temp_f_value = ifelse(temp_f_value < 74, 74, temp_f_value)
+  temp_f_value = ifelse(temp_f_value  > 95, 95, temp_f_value)
+  
+  relative_humidity = ifelse(relative_humidity < 20, 20, relative_humidity)
+  relative_humidity = ifelse(relative_humidity > 60, 60, relative_humidity)
+  # if (temp_f_value < 74){
+  #  temp_f_value = 74
+  # }
+  # if (temp_f_value > 95){
+  #   temp_f_value = 95
+  # }
+  # if (relative_humidity < 20){
+  #   relative_humidity = 20
+  # }
+  # if (relative_humidity > 60){
+  #   relative_humidity = 60
+  # }
+  
   #test cases commented out
   #temp_f_value = 74 
   #relative_humidity = 20
@@ -54,13 +75,45 @@ sfcHalfLifeCalc <- function(temp_f_value, relative_humidity, perc_decay){
   #   Hours = c(covid_half_life_hours, covid_99_99_hours, covid_99_9999_hours, covid_99_999999_hours),
   #   Days = c(covid_half_life_days, covid_99_99_days, covid_99_9999_days, covid_99_999999_days))
   
+  covid_decay_hours = ifelse(temp_f_value_orig < 74, paste(">",covid_decay_hours, sep=""),
+         ifelse(temp_f_value_orig > 95, paste("<",covid_decay_hours, sep=""),
+                ifelse(relative_humidity_orig < 20, paste(">",covid_decay_hours, sep=""),
+                       ifelse(relative_humidity_orig > 60, paste(">",covid_decay_hours, sep=""),
+                              covid_decay_hours))))
   return(covid_decay_hours)
 }
-#sfcHalfLifeCalc(74,40,0.5) #50% decay example w/output in hours
+#sfcHalfLifeCalc(74,57,0.5) #50% decay example w/output in hours
 
 #airborne decay equation based on most DHS gov model available as of June 15, 2020
 #https://www.dhs.gov/science-and-technology/sars-airborne-calculator
 airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_value, perc_decay){
+  #model constraints
+  temp_f_value_orig = temp_f_value
+  relative_humidity_value_orig = relative_humidity_value
+  uv_index_value_orig = uv_index_value
+  
+  temp_f_value = ifelse(temp_f_value < 50, 50, temp_f_value)
+  temp_f_value = ifelse(temp_f_value  > 86, 86, temp_f_value)
+  relative_humidity_value = ifelse(relative_humidity_value < 20, 20, relative_humidity_value)
+  relative_humidity_value = ifelse(relative_humidity_value > 70, 70, relative_humidity_value)
+  uv_index_value = ifelse(uv_index_value == 0, 1, uv_index_value)
+  
+  # if (temp_f_value < 50){
+  #   temp_f_value = 50
+  # }
+  # if (temp_f_value > 86){
+  #   temp_f_value = 86
+  # }
+  # if (relative_humidity_value < 20){
+  #   relative_humidity = 20
+  # }
+  # if (relative_humidity_value > 70){
+  #   relative_humidity = 70
+  # }
+  # if (uv_index_value == 0){
+  #   uv_index_value = 1
+  # }
+  
   #test cases commented out
   # temp_f_value = 50 
   # relative_humidity_value = 20
@@ -129,9 +182,36 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
   #     Minutes = c(covid_half_life_minutes, covid_90_minutes, covid_99_minutes),
   #     Hours = c(covid_half_life_hours, covid_90_hours, covid_99_hours))
   
+  covid_decay_minutes = ifelse(temp_f_value_orig < 50, paste(">",covid_decay_minutes, sep=""),
+                             ifelse(temp_f_value_orig > 86, paste("<",covid_decay_minutes, sep=""),
+                                    ifelse(relative_humidity_value_orig < 20, paste(">",covid_decay_minutes, sep=""),
+                                           ifelse(relative_humidity_value_orig > 70, paste(">",covid_decay_minutes, sep=""),
+                                                  ifelse(uv_index_value_orig == 0, paste(">",covid_decay_minutes, sep=""),
+                                                  covid_decay_minutes)))))
+  # if (temp_f_value_orig < 50){
+  #   covid_decay_minutes = paste(">",covid_decay_minutes, sep="")
+  #   #return(covid_decay_minutes)
+  # }
+  # else if (temp_f_value_orig > 86){
+  #   covid_decay_minutes = paste("<",covid_decay_minutes, sep="")
+  #   #return(covid_decay_minutes)
+  # }
+  # else if (relative_humidity_value_orig < 20){
+  #   covid_decay_minutes = paste(">",covid_decay_minutes, sep="")
+  #   #return(covid_decay_minutes)
+  # }
+  # else if (relative_humidity_value_orig > 70){
+  #   covid_decay_minutes = paste("<",covid_decay_minutes, sep="")
+  #   #return(covid_decay_minutes)
+  # }
+  # else if (uv_index_value_orig == 0){
+  #   covid_decay_minutes = paste(">",covid_decay_minutes, sep="")
+  #   #return(covid_decay_minutes)
+  # }
+  
   return(covid_decay_minutes)
 }
-#airHalfLifeCalc(50,20,1,0.5)
+#airHalfLifeCalc(30,27,1,0.5)
 #sfcHalfLifeCalc(74,40,0.5)
 
 # Get data ----
@@ -145,7 +225,7 @@ state_abbrev <- read.csv("https://raw.githubusercontent.com/chris-taylor/USElect
   
 city_list <- 
   import("https://raw.githubusercontent.com/parmsam/national-weather-service-forecasts/master/1000-largest-us-cities-by-population-with-geographic-coordinates.csv") %>% 
-  separate(Coordinates, into=c("Long","Lat"),sep=regex(","))  %>% 
+  separate(Coordinates, into=c("Lat","Long"),sep=regex(","))  %>% 
   mutate(city_state=paste0(City,", ",State)) %>% 
   inner_join(.,state_abbrev, by=c("State"="state"))
 
@@ -183,16 +263,21 @@ ui <- fluidPage(
       "This app is designed to make it easier for public health practioners to get current location-specific SARS-CoV-2 airborne or surface decay estimates.",
       "It is based based on current weather forecasts and recent DHS models (as of June 15th, 2020).",
       br(),
-      strong("Info sources:"),
+      strong("Sources:"),
       "National Weather Service (NWS) API used to obtain current temperature and relative humidity estimates.",
       "UV index pulled from daily NWS Text Bulletin. Note that this may result in underestimated airborne time to breakdown (decay).",
       "Airborne and Surface Decay based on models published by Department of Homeland Security (DHS) as of June 15th, 2020.",
+      "Time of day in Coordinated Universal Time (UTC).",
       br(),
       strong("Reference models:"),
       "See links below for more info on DHS models (background and caveats for each model).",
       br(),
       tags$li(a("https://www.dhs.gov/science-and-technology/sars-airborne-calculator")),
+      "DHS Airborne Model: The tool is valid for the following ranges of conditions: 50-86°F, 20-70% relative humidity, and UV indices of 1-10. 
+              The model currently doesn’t allow for a UV index of 0.",
       tags$li(a("https://www.dhs.gov/science-and-technology/sars-calculator")),
+      "DHS Surface Model: Model can estimate virus decay at certain conditions: temperature (room temperature or 74°F to 95°F) 
+      and relative humidity from 20-60%, without exposure to direct sunlight.",
       br(),
       strong("Github repo:"),
       "See Github repo for more info and source code.",
@@ -213,16 +298,16 @@ server <- function(input, output) {
       filter(grepl(input$variable_1,city_state))
     
     city_data_join <- city_data %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
-    city_data <- city_data_join %>% select(City,Long,Lat) %>% data.frame() %>% 
-      select(City,Long,Lat) %>% top_n(1) %>% data.frame()
+    city_data <- city_data_join %>% select(City,Lat,Long) %>% data.frame() %>% 
+      select(City,Lat,Long) %>% top_n(1) %>% data.frame()
     
     #today's estimated UVI
     city_UVI <- city_data_join$UVI
     
     
     base_url = "https://api.weather.gov/points/"
-    long_lat = paste0(city_data$Long,",", city_data$Lat)
-    frst_url <- paste0(base_url,long_lat);frst_url
+    lat_long = paste0(city_data$Lat,",", city_data$Long)
+    frst_url <- paste0(base_url,lat_long);frst_url
     
     #first call to get unique forecast api request 
     req<-httr::GET(frst_url)
@@ -277,6 +362,7 @@ server <- function(input, output) {
     temp_and_humid <- temp_and_humid %>% rename(!!newname1 := `Surface Percent Virus Decay (hours)`,
                                                 !!newname2 := `Airborne Percent Virus Decay (minutes)`
                                                 )
+   
 })
   
   output$data <- DT::renderDataTable({ 
