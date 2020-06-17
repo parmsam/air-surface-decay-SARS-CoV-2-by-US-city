@@ -216,7 +216,7 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
 
 # Get data ----
 today <- as.character(Sys.Date())
-yesterday <- as.character(Sys.Date()-1)
+tomorrow <- as.character(Sys.Date()+1)
 
 state_abbrev <- read.csv("https://raw.githubusercontent.com/chris-taylor/USElection/master/data/state-abbreviations.csv", 
                          header=FALSE) %>%
@@ -323,9 +323,9 @@ server <- function(input, output) {
     weather_dat <- fromJSON(json)
     
     #pull tonight/tmrw/rest week weather data from rest data
-    temperature <- weather_dat$properties$temperature$values
+    temperature <- weather_dat$properties$temperature$values %>% mutate(validTime = str_remove(validTime,"/\\w*"))
     temperature_unit <- weather_dat$properties$temperature$uom
-    relativeHumidity <- weather_dat$properties$relativeHumidity$values
+    relativeHumidity <- weather_dat$properties$relativeHumidity$values %>% mutate(validTime = str_remove(validTime,"/\\w*"))
     relativeHumidity_unit <- weather_dat$properties$relativeHumidity$sourceUnit
     
     #only have most current UVI so will need to limit historical or future UVI declaration 
@@ -337,7 +337,7 @@ server <- function(input, output) {
                                            temperature, temperature_unit) %>% 
       mutate(temperature_F = convertToFahr(temperature)) %>% 
       mutate(cityUVI = city_UVI) %>% 
-      filter(str_detect(validTime,paste(today,yesterday,sep="|"))) %>%
+      filter(str_detect(validTime,paste(today,tomorrow,sep="|"))) %>%
       mutate(temperature_F = round(convertToFahr(.$temperature),1)) %>%
       mutate(`Airborne Percent Virus Decay (minutes)`= airHalfLifeCalc(.$temperature_F, 
                                                                    .$relativeHumidity, 
