@@ -332,8 +332,7 @@ server <- function(input, output) {
     temp_and_humid <- relativeHumidity %>% 
       inner_join(temperature, by='validTime') %>% 
       mutate(relativeHumidity = value.x,temperature = value.y) %>% 
-      mutate(temperature_unit = temperature_unit,
-             relativeHumidity_unit = relativeHumidity_unit) %>% 
+      mutate(temperature_unit = temperature_unit) %>% 
       select(-value.x,-value.y) %>% select(validTime, relativeHumidity, relativeHumidity_unit, 
                                            temperature, temperature_unit) %>% 
       mutate(temperature_F = convertToFahr(temperature)) %>% 
