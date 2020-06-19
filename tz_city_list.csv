@@ -1,22 +1,22 @@
-city, state, tz
-New York, NY, America/New_York
-Los Angeles, CA, America/Los_Angeles
-Chicago, IL, American/Chicago
-Houston, TX, American/Chicago
-Phoenix, AZ, America/Phoenix
-Philadelphia, PA, America/New_York
-San Antonio, TX, American/Chicago
-San Diego, CA, America/Los_Angeles
-Dallas, TX, American/Chicago
-San Jose, CA, America/Los_Angeles
-Austin, TX, American/Chicago
-Jacksonville, FL, America/New_York
-Fort Worth, TX, American/Chicago
-Columbus, OH, America/New_York
-Charlotte, NC, America/New_York
-San Francisco, CA, America/Los_Angeles
-Indianapolis, IN, America/New_York
-Seattle, WA, America/Los_Angeles
-Denver, CO, American/Denver
-Washington, DC, America/New_York
-Boston, MA, America/New_York
+city,state,tz
+New York,NY,America/New_York
+Los Angeles,CA,America/Los_Angeles
+Chicago,IL,American/Chicago
+Houston,TX,American/Chicago
+Phoenix,AZ,America/Phoenix
+Philadelphia,PA,America/New_York
+San Antonio,TX,American/Chicago
+San Diego,CA,America/Los_Angeles
+Dallas,TX,American/Chicago
+San Jose,CA,America/Los_Angeles
+Austin,TX,American/Chicago
+Jacksonville,FL,America/New_York
+Fort Worth,TX,American/Chicago
+Columbus,OH,America/New_York
+Charlotte,NC,America/New_York
+San Francisco,CA,America/Los_Angeles
+Indianapolis,IN,America/New_York
+Seattle,WA,America/Los_Angeles
+Denver,CO,American/Denver
+Washington,DC,America/New_York
+Boston,MA,America/New_York
