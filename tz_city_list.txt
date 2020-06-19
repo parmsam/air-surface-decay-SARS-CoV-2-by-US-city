@@ -1,0 +1,22 @@
+city, state, tz
+New York, New York, America/New_York
+Los Angeles, California, America/Los_Angeles
+Chicago, Illinois, American/Chicago
+Houston, Texas, American/Chicago
+Phoenix, Arizona, America/Phoenix
+Philadelphia, Pennsylvania, America/New_York
+San Antonio, Texas, American/Chicago
+San Diego, California, America/Los_Angeles
+Dallas, Texas, American/Chicago
+San Jose, California, America/Los_Angeles
+Austin, Texas, American/Chicago
+Jacksonville, Florida, America/New_York
+Fort Worth, Texas, American/Chicago
+Columbus, Ohio, America/New_York
+Charlotte, North Carolina, America/New_York
+San Francisco, California, America/Los_Angeles
+Indianapolis, Indiana, America/New_York
+Seattle, Washington,America/Los_Angeles
+Denver, Colorado, American/Denver
+Washington, District of Columbia
+Boston, Massachusetts, America/New_York
