@@ -218,7 +218,7 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
 today <- as.character(Sys.Date())
 tomorrow <- as.character(Sys.Date()+1)
 
-state_abbrev <- read.csv("https://raw.githubusercontent.com/chris-taylor/USElection/master/data/state-abbreviations.csv", 
+state_abbrev <- read.csv("https://raw.githubusercontent.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city/master/state-abbreviations.csv", 
                          header=FALSE) %>%
   mutate(state = as.character(V1), abbrev = as.character(V2)) %>% 
   select(-V1,-V2)
@@ -229,16 +229,22 @@ city_list <-
   mutate(city_state=paste0(City,", ",State)) %>% 
   inner_join(.,state_abbrev, by=c("State"="state"))
 
-UVI_data <- read.delim("https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt", 
-                       row.names=NULL)
-df_UVI <- slice(UVI_data,-(1:21))
-df1_UVI <- str_split_fixed(df_UVI$row.names,regex("\\s\\s+"), n=6)
-colnames(df1_UVI) <- df1_UVI[1,]
-df1_UVI <- df1_UVI[-1,]
-df2_UVI <- rbind(df1_UVI[,1:3], df1_UVI[,4:6]) %>% data.frame() %>% 
-  mutate(CITY = str_to_title(CITY), UVI = as.numeric(as.character(UVI)))
+####
+#get timezone data for 20 states
+timezone_Df <- read.csv("https://raw.githubusercontent.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city/master/tz_city_list.csv") %>% 
+  mutate(city=as.character(city), state=as.character(state), tz= as.character(tz))
 
-city_select_list <- city_list %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
+# UVI_data <- read.delim("https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt",
+#                        row.names=NULL)
+# df_UVI <- slice(UVI_data,-(1:21))
+# df1_UVI <- str_split_fixed(df_UVI$row.names,regex("\\s\\s+"), n=6)
+# colnames(df1_UVI) <- df1_UVI[1,]
+# df1_UVI <- df1_UVI[-1,]
+# df2_UVI <- rbind(df1_UVI[,1:3], df1_UVI[,4:6]) %>% data.frame() %>%
+#   mutate(CITY = str_to_title(CITY), UVI = as.numeric(as.character(UVI)))
+
+#city_select_list <- city_list %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
+city_select_list <- city_list %>% inner_join(timezone_Df, by = c("City"="city","abbrev"="state"))
 
 # Define UI for application that ouptuts table of weather forecast
 
@@ -265,23 +271,27 @@ ui <- fluidPage(
       br(),
       strong("Sources:"),
       "National Weather Service (NWS) API used to obtain current temperature and relative humidity estimates.",
-      "UV index pulled from daily NWS Text Bulletin. Note that this may result in underestimated airborne time to breakdown (decay).",
+      "EPA Envirofacts Data Service API was used to obtain hourly UV index data.",
       "Airborne and Surface Decay based on models published by Department of Homeland Security (DHS) as of June 15th, 2020.",
       "Time of day in Coordinated Universal Time (UTC).",
       br(),
+      strong("Time Zone Convertor Tool:"),
+      "See time zone convertor to get your city time in UTC.",
+      br(),
+      tags$li(a("The Time Zone Convertor", href="https://www.thetimezoneconverter.com/")),
       strong("Reference models:"),
       "See links below for more info on DHS models (background and caveats for each model).",
       br(),
-      tags$li(a("https://www.dhs.gov/science-and-technology/sars-airborne-calculator")),
+      tags$li(a("SARS-CoV-2 Airborne Decay Calculator", href="https://www.dhs.gov/science-and-technology/sars-airborne-calculator")),
       "DHS Airborne Model: The tool is valid for the following ranges of conditions: 50-86°F, 20-70% relative humidity, and UV indices of 1-10. 
               The model currently doesn’t allow for a UV index of 0.",
-      tags$li(a("https://www.dhs.gov/science-and-technology/sars-calculator")),
+      tags$li(a("SARS-CoV-2 Surface Decay Calculator", href="https://www.dhs.gov/science-and-technology/sars-calculator")),
       "DHS Surface Model: Model can estimate virus decay at certain conditions: temperature (room temperature or 74°F to 95°F) 
       and relative humidity from 20-60%, without exposure to direct sunlight.",
       br(),
       strong("Github repo:"),
-      "See Github repo for more info and source code.",
-      tags$li(a("https://github.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city"))
+      "See Sam's Github for more info and source code.",
+      tags$li(a("Sam's Github Repo",href="https://github.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city"))
     ),
     
     # Show a data table of the weather forecast prediction for weather.gov
@@ -297,12 +307,14 @@ server <- function(input, output) {
     city_data <- city_list %>% 
       filter(grepl(input$variable_1,city_state))
     
-    city_data_join <- city_data %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
-    city_data <- city_data_join %>% select(City,Lat,Long) %>% data.frame() %>% 
-      select(City,Lat,Long) %>% top_n(1) %>% data.frame()
+    #city_data_join <- city_data %>% inner_join(df2_UVI, by = c("City"="CITY","abbrev"="STATE"))
+    city_data_join <- city_data %>% inner_join(timezone_Df, by = c("City"="city","abbrev"="state"))
+    
+    city_data <- city_data_join %>% select(City,State, abbrev, Lat,Long) %>% data.frame() %>% 
+      select(City,State, abbrev, Lat,Long) %>% top_n(1) %>% data.frame()
     
     #today's estimated UVI
-    city_UVI <- city_data_join$UVI
+    #city_UVI <- city_data_join$UVI
     
     
     base_url = "https://api.weather.gov/points/"
@@ -322,6 +334,23 @@ server <- function(input, output) {
     json <- httr::content(req, as = "text")
     weather_dat <- fromJSON(json)
     
+    #third api call for UVI data
+    epa_base_url = "https://enviro.epa.gov/enviro/efservice/getEnvirofactsUVHOURLY/CITY/"
+    city_abbrev_end = paste0(str_to_lower(city_data$City),"/STATE/",str_to_lower(city_data$abbrev),"/JSON")
+    uvi_url <- paste0(epa_base_url,city_abbrev_end);frst_url
+    uvi_req<-httr::GET(uvi_url)
+    uvi_json <- httr::content(uvi_req, as = "text")
+    uvi_dat <- fromJSON(uvi_json)
+    
+    timezone_Df_filt <- timezone_Df %>% filter(str_detect(city,city_data$City))
+    timezone_str = timezone_Df_filt$tz
+    b <- uvi_dat %>% 
+      mutate(DATE_TIME = mdy_h(DATE_TIME))
+    tz(b$DATE_TIME) = timezone_str 
+    #b %>% glimpse()
+    c <- b %>% mutate(DATE_TIME = with_tz(DATE_TIME, "UTC")) %>% 
+      rename(cityUVI=UV_VALUE)
+    
     #pull tonight/tmrw/rest week weather data from rest data
     temperature <- weather_dat$properties$temperature$values %>% mutate(validTime = str_remove(validTime,"/\\w*"))
     temperature_unit <- weather_dat$properties$temperature$uom
@@ -329,6 +358,8 @@ server <- function(input, output) {
     relativeHumidity_unit <- weather_dat$properties$relativeHumidity$sourceUnit
     
     #only have most current UVI so will need to limit historical or future UVI declaration 
+    
+    #mutate(cityUVI = city_UVI) %>% 
     temp_and_humid <- relativeHumidity %>% 
       inner_join(temperature, by='validTime') %>% 
       mutate(relativeHumidity = value.x,temperature = value.y) %>% 
@@ -336,9 +367,13 @@ server <- function(input, output) {
       select(-value.x,-value.y) %>% select(validTime, relativeHumidity, relativeHumidity_unit, 
                                            temperature, temperature_unit) %>% 
       mutate(temperature_F = convertToFahr(temperature)) %>% 
-      mutate(cityUVI = city_UVI) %>% 
       filter(str_detect(validTime,paste(today,tomorrow,sep="|"))) %>%
       mutate(temperature_F = round(convertToFahr(.$temperature),1)) %>%
+      mutate(validTime = as.character(ymd_hms(str_remove(validTime,"/\\w*")))) %>%
+      mutate(validTime = mdy_h(strftime(validTime, format="%m-%d-%y %H"))) %>%
+      inner_join(c, by=c('validTime'='DATE_TIME'))
+    
+    temp_and_humid <- temp_and_humid %>% 
       mutate(`Airborne Percent Virus Decay (minutes)`= airHalfLifeCalc(.$temperature_F, 
                                                                    .$relativeHumidity, 
                                                                    .$cityUVI,
@@ -346,14 +381,14 @@ server <- function(input, output) {
       mutate(`Surface Percent Virus Decay (hours)`= sfcHalfLifeCalc(.$temperature_F, 
                                                                   .$relativeHumidity,
                                                                   perc_decay = as.numeric(input$variable_2)/100)) %>%
-      mutate(validTime = as.character(ymd_hms(str_remove(validTime,"/\\w*"))))
+      mutate(validTime = as.character(validTime))
     
     temp_and_humid <- temp_and_humid %>% select(`Time (UTC)`=validTime, 
                                                 `Surface Percent Virus Decay (hours)`, 
                                                 `Airborne Percent Virus Decay (minutes)`,
                                                 `Temperature (Fahrenheit)`= temperature_F,
                                                 `Relative Humidity` = `relativeHumidity`,
-                                                `UV Index` = cityUVI)
+                                                `UV Index` = cityUVI) 
     
     newname1 = paste("Time (hours) to breakdown of",input$variable_2,"percent of virus on surfaces",sep=" ")
     newname2 = paste("Time (minutes) to breakdown of",input$variable_2,"percent of airborne virus",sep=" ")
