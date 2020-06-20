@@ -215,6 +215,7 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
 #sfcHalfLifeCalc(74,40,0.5)
 
 # Get data ----
+yesterday <- as.character(Sys.Date()-1)
 today <- as.character(Sys.Date())
 tomorrow <- as.character(Sys.Date()+1)
 
@@ -367,7 +368,7 @@ server <- function(input, output) {
       select(-value.x,-value.y) %>% select(validTime, relativeHumidity, relativeHumidity_unit, 
                                            temperature, temperature_unit) %>% 
       mutate(temperature_F = convertToFahr(temperature)) %>% 
-      filter(str_detect(validTime,paste(today,tomorrow,sep="|"))) %>%
+      filter(str_detect(validTime,paste(today,tomorrow,yesterday, sep="|"))) %>%
       mutate(temperature_F = round(convertToFahr(.$temperature),1)) %>%
       mutate(validTime = as.character(ymd_hms(str_remove(validTime,"/\\w*")))) %>%
       mutate(validTime = mdy_h(strftime(validTime, format="%m-%d-%y %H"))) %>%
