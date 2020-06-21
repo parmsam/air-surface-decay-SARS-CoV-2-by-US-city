@@ -218,6 +218,7 @@ airHalfLifeCalc <- function(temp_f_value, relative_humidity_value, uv_index_valu
 yesterday <- as.character(Sys.Date()-1)
 today <- as.character(Sys.Date())
 tomorrow <- as.character(Sys.Date()+1)
+day_after_tmrw <-as.character(Sys.Date()+2)
 
 state_abbrev <- read.csv("https://raw.githubusercontent.com/parmsam/air-surface-decay-SARS-CoV-2-by-US-city/master/state-abbreviations.csv", 
                          header=FALSE) %>%
@@ -267,7 +268,7 @@ ui <- fluidPage(
                      choices=c(50,90,99,99.99,99.9999,99.999999)
       ),
       strong("Purpose:"),
-      "This app is designed to make it easier for public health practioners to get current location-specific SARS-CoV-2 airborne or surface decay estimates.",
+      "This app is designed to make it easier for public health and public safety workers to get current location-specific SARS-CoV-2 airborne or surface decay estimates.",
       "It is based based on current weather forecasts and recent DHS models (as of June 15th, 2020).",
       br(),
       strong("Sources:"),
@@ -368,7 +369,7 @@ server <- function(input, output) {
       select(-value.x,-value.y) %>% select(validTime, relativeHumidity, relativeHumidity_unit, 
                                            temperature, temperature_unit) %>% 
       mutate(temperature_F = convertToFahr(temperature)) %>% 
-      filter(str_detect(validTime,paste(today,tomorrow,yesterday, sep="|"))) %>%
+      filter(str_detect(validTime,paste(today,tomorrow,yesterday,day_after_tmrw, sep="|"))) %>%
       mutate(temperature_F = round(convertToFahr(.$temperature),1)) %>%
       mutate(validTime = as.character(ymd_hms(str_remove(validTime,"/\\w*")))) %>%
       mutate(validTime = mdy_h(strftime(validTime, format="%m-%d-%y %H"))) %>%
