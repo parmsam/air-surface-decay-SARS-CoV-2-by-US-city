@@ -13,9 +13,11 @@ Purpose: Develop R shiny app to provide airborne and surface decay estimates for
 https://www.dhs.gov/science-and-technology/sars-airborne-calculator
 ### Estimated SARS-CoV-2 (COVID-19) Surface Decay from DHS
 https://www.dhs.gov/science-and-technology/sars-calculator
-### National Weather Service (NWS) API
+### National Weather Service (NWS) API for Temperature and Humidity
 https://www.weather.gov/documentation/services-web-api
-### National Weather Service Ultraviolet (UV) Index 
+### EPA Envirofacts Data Service API for Hourly UV Index Data
+https://www.epa.gov/enviro/envirofacts-data-service-api
+### National Weather Service Ultraviolet (UV) Index (prior to hourly UV index integration)
 https://www.weather.gov/rah/uv
 
 https://www.cpc.ncep.noaa.gov/products/stratosphere/uv_index/bulletin.txt
