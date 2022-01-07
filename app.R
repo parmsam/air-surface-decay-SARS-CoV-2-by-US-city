@@ -5,7 +5,7 @@ library(jsonlite)
 library(httr)
 library(DT)
 library(lubridate)
-
+library(glue)
 # Define functions ----
 #surface decay equation based on most DHS gov model available as of June 15, 2020
 #https://www.dhs.gov/science-and-technology/sars-calculator
@@ -321,8 +321,8 @@ server <- function(input, output) {
     
     base_url = "https://api.weather.gov/points/"
     lat_long = paste0(city_data$Lat,",", city_data$Long)
-    frst_url <- paste0(base_url,lat_long);frst_url
-    
+    frst_url <- paste0(base_url,lat_long);
+
     #first call to get unique forecast api request 
     req<-httr::GET(frst_url)
     json <- httr::content(req, as = "text")
@@ -338,7 +338,7 @@ server <- function(input, output) {
     
     #third api call for UVI data
     epa_base_url = "https://enviro.epa.gov/enviro/efservice/getEnvirofactsUVHOURLY/CITY/"
-    city_abbrev_end = paste0(str_to_lower(city_data$City),"/STATE/",str_to_lower(city_data$abbrev),"/JSON")
+    city_abbrev_end = paste0(str_to_lower(city_data$City),glue("/{city_data$State}"),"/",str_to_lower(city_data$abbrev),"/JSON")
     uvi_url <- paste0(epa_base_url,city_abbrev_end);frst_url
     uvi_req<-httr::GET(uvi_url)
     uvi_json <- httr::content(uvi_req, as = "text")
