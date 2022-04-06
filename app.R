@@ -227,7 +227,7 @@ state_abbrev <- read.csv("https://raw.githubusercontent.com/parmsam/air-surface-
   
 city_list <- 
   import("https://raw.githubusercontent.com/parmsam/national-weather-service-forecasts/master/1000-largest-us-cities-by-population-with-geographic-coordinates.csv") %>% 
-  separate(Coordinates, into=c("Lat","Long"),sep=regex(","))  %>% 
+  separate(Coordinates, into=c("Lat","Long"),sep=",")  %>% 
   mutate(city_state=paste0(City,", ",State)) %>% 
   inner_join(.,state_abbrev, by=c("State"="state"))
 
@@ -326,7 +326,7 @@ server <- function(input, output) {
     #first call to get unique forecast api request 
     req<-httr::GET(frst_url)
     json <- httr::content(req, as = "text")
-    weather_dat <- fromJSON(json)
+    weather_dat <- jsonlite::fromJSON(json)
     
     forecast_url <- weather_dat$properties$forecast
     forecastGridData_url <- weather_dat$properties$forecastGridData
@@ -334,15 +334,17 @@ server <- function(input, output) {
     #second api call to get forecast data for city of interest
     req<-httr::GET(forecastGridData_url)
     json <- httr::content(req, as = "text")
-    weather_dat <- fromJSON(json)
+    weather_dat <- jsonlite::fromJSON(json)
     
     #third api call for UVI data
-    epa_base_url = "https://enviro.epa.gov/enviro/efservice/getEnvirofactsUVHOURLY/CITY/"
-    city_abbrev_end = paste0(str_to_lower(city_data$City),glue("/{city_data$State}"),"/",str_to_lower(city_data$abbrev),"/JSON")
-    uvi_url <- paste0(epa_base_url,city_abbrev_end);frst_url
+    # epa_base_url = "https://enviro.epa.gov/enviro/efservice/getEnvirofactsUVHOURLY/CITY/"
+    # city_abbrev_end = paste0(str_to_lower(city_data$City),glue("/{city_data$State}"),"/",str_to_lower(city_data$abbrev),"/JSON")
+    # uvi_url <- paste0(epa_base_url,city_abbrev_end);frst_url
+    uvi_url = glue::glue("https://data.epa.gov/efservice/getEnvirofactsUVHOURLY/CITY/{city_data$City}/STATE/{str_to_lower(city_data$abbrev)}/JSON")
+    print(uvi_url)
     uvi_req<-httr::GET(uvi_url)
     uvi_json <- httr::content(uvi_req, as = "text")
-    uvi_dat <- fromJSON(uvi_json)
+    uvi_dat <- jsonlite::fromJSON(uvi_json)
     
     timezone_Df_filt <- timezone_Df %>% filter(str_detect(city,city_data$City))
     timezone_str = timezone_Df_filt$tz
